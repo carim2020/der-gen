@@ -1,10 +1,11 @@
 # TODO: Some refactoring is needed. The Molecule class has too many responsibilities.
-# TODO: Name: SubIt
+import enum
 
 from Atom import Atom
 from copy import copy
 from Helper import Vector3
 from enum import Enum
+from typing import Dict, List
 
 # from abc import ABC, abstractmethod
 
@@ -17,9 +18,9 @@ __status__ = "Prototype"
 
 
 class CycleSelection(Enum):
-    CYCLES = 1
-    NON_CYCLES = 2
-    ALL = 3
+    CYCLES = enum.auto()
+    NON_CYCLES = enum.auto()
+    ALL = enum.auto()
 
 
 class Molecule:
@@ -29,11 +30,11 @@ class Molecule:
             Constructor for the Molecule class with optional copy function
         """
         self.__sites = []  # Contains the atoms database cycles
-        self.__atoms = dict()  # Dictionary of all the atoms database the molecule
-        self.__bonds = dict()  # Dictionary of all the bonds database the molecule
+        self.__atoms: Dict[int, Atom] = dict()  # Dictionary of all the atoms database the molecule
+        self.__bonds: Dict[str, int] = dict()  # Dictionary of all the bonds database the molecule
         self.__indexer = 0
         self.__is_modified = False
-        self.__neighbours = dict()  # Dictionary of lists of all the neighbours of the atoms
+        self.__neighbours: Dict[int, List[Atom]] = dict()  # Dictionary of lists of all the neighbours of the atoms
         self.__inchi_key: str = ""
 
     def add_atom(self, atom: Atom) -> int:
@@ -128,19 +129,19 @@ class Molecule:
         return len(self.__atoms)
 
     @property
-    def atoms(self) -> dict:
+    def atoms(self) -> dict[int, Atom]:
         return copy(self.__atoms)
 
     @property
-    def bonds(self) -> dict:
+    def bonds(self) -> dict[str, int]:
         return copy(self.__bonds)
 
     @property
-    def sites(self) -> list:
+    def sites(self) -> list[int]:
         return copy(self.__sites)
 
     @property
-    def neighbours(self) -> dict:
+    def neighbours(self) -> Dict[int, List[Atom]]:
         return self.__neighbours
 
     @property
@@ -148,7 +149,6 @@ class Molecule:
         return self.__inchi_key
 
     def __find_cycles(self) -> list[Atom]:
-        cycles: list[Atom] = []
         passed: list[int] = [0] * (self.num_atoms + 1)
         mark: list[bool] = [False] * (self.num_atoms + 1)
         parent: list[int] = [0] * (self.num_atoms + 1)
@@ -187,20 +187,20 @@ class Molecule:
             passed[cur.id] = 2
 
         # Update the cycles list
-        for ind, m in enumerate(mark):
-            if m:
-                cycles.append(self.get_atom(ind))
-
+        cycles: list[Atom] = [self.__atoms[ind] for ind, m in enumerate(mark) if m]
         return copy(cycles)
 
-    def get_sites(self, option: CycleSelection) -> None:
-        if option is CycleSelection.CYCLES:
-            self.__sites =  self.__find_cycles()
-        elif option is CycleSelection.NON_CYCLES:
+    def get_sites(self, selection: CycleSelection) -> None:
+        # Why it has to be with value but not without?
+        # Potential BUG
+        if selection.value is CycleSelection.CYCLES.value:
+            self.__sites = self.__find_cycles()
+
+        elif selection.value is CycleSelection.NON_CYCLES.value:
             cycle = self.__find_cycles()
             self.__sites = [self.__atoms[k] for k in self.__atoms
                             if self.__atoms[k].symbol != "H" and self.__atoms[k] not in cycle]
-        elif option is CycleSelection.ALL:
+        elif selection.value is CycleSelection.ALL.value:
             self.__sites = [self.__atoms[k] for k in self.__atoms
                             if self.__atoms[k].symbol != "H"]
 
@@ -243,7 +243,7 @@ class Molecule:
         # self.start_modify()
 
         def remove(parent: Atom, substituent: Atom):
-            neigh = self.neighbours[substituent.id].copy()
+            neigh = copy(self.neighbours[substituent.id])
             for atom in neigh:
                 if atom.id != parent.id:
                     remove(substituent, atom)
@@ -253,8 +253,7 @@ class Molecule:
 
         remove(c, sub)
 
-        self.add_atom(hydrogen)
-        new_id = self.find_atom(hydrogen.coord).id
+        new_id = self.add_atom(hydrogen)
         self.add_bond(c.id, new_id, 1)
 
         # self.end_modify()
@@ -262,17 +261,23 @@ class Molecule:
 
 if __name__ == "__main__":
 
-    sl = ['C', 'O', 'H', 'H', 'Ne']
-    mol = Molecule()
-    for s in sl:
-        tmp = Atom()
-        tmp.symbol = s
-        mol.add_atom(tmp)
+    import os
+    from Translator import ob2qca, qca2ob
+    from openbabel import openbabel as ob
 
-    mol.add_bond(0, 1, 2)
-    mol.add_bond(0, 2, 1)
-    mol.add_bond(0, 3, 1)
+    WORK_FOLDER = os.getcwd()
 
-    mol.add_bond(0, 4, 1)
-    mol.del_atom(2)
+    # Testing  code
+    a = ob.OBMol()
+    conv = ob.OBConversion()
+    conv.SetInAndOutFormats('smi', 'svg')
+    conv.ReadString(a, "C1=CC=C2C(=C1)C=CC2")
+    a.AddHydrogens()
+    builder = ob.OBBuilder()
+    builder.Build(a)
+
+    mol = ob2qca(a)
     mol.get_sites(CycleSelection.CYCLES)
+
+    obm = qca2ob(mol)
+    conv.WriteFile(obm, os.path.join(WORK_FOLDER, "original.svg"))
