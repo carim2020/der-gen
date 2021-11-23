@@ -1,5 +1,4 @@
 # TODO: Some refactoring is needed. The Molecule class has too many responsibilities.
-# TODO: Name: SubIt
 import enum
 
 from Atom import Atom
@@ -254,8 +253,7 @@ class Molecule:
 
         remove(c, sub)
 
-        self.add_atom(hydrogen)
-        new_id = self.find_atom(hydrogen.coord).id
+        new_id = self.add_atom(hydrogen)
         self.add_bond(c.id, new_id, 1)
 
         # self.end_modify()

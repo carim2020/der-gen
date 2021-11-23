@@ -1,7 +1,7 @@
 import math
 import os
 
-from Molecule import Molecule
+from Molecule import Molecule, CycleSelection
 from Atom import Atom
 from Helper import cross_product, dot_product, Vector3
 
@@ -70,7 +70,7 @@ class Propylyl(Molecule):
             hydro.coord = new_c3.coord + new_H_vec.rotate_around_axis(bond_vector, 2/3*math.pi * ind)
 
         # First called BeginModify to stop reindexing at every step
-        self.start_modify()
+        # self.start_modify()
 
         self.del_atom(h.id)
         self.add_atom(new_c1)
@@ -85,7 +85,7 @@ class Propylyl(Molecule):
         for i in new_H:
             self.add_bond(new_c3.id, i.id, 1)
         
-        self.end_modify()
+        # self.end_modify()
 
         return self.find_atom(new_c1.coord)
 
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     builder.Build(a)
 
     mol = Propylyl(ob2qca(a))
-    mol.find_cycles()
+    mol.get_sites(CycleSelection.CYCLES)
     # print([(m.id, m.symbol) for m in mol.cycles])
     c1, c2, h = mol.get_neighbours(0)
 

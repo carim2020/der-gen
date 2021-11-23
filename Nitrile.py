@@ -1,6 +1,6 @@
 import os
 
-from Molecule import Molecule
+from Molecule import Molecule, CycleSelection
 from Atom import Atom
 
 
@@ -25,8 +25,7 @@ class Nitrile(Molecule):
 
         for b in bond_set:
             self.add_bond(b[0], b[1], b[2])
-            
-        
+
     def generate_new_compound(self, c1: Atom, c2: Atom, h: Atom):
         """
                 Extension of the Molecule class to create nitrile compounds
@@ -37,28 +36,31 @@ class Nitrile(Molecule):
         newC = Atom()
         newC.atomic_num = 6
         newC.symbol = "C"
-        newC.id = self.num_atoms
+        # newC.id = self.num_atoms
         newC.coord = h.coord
         
         newN = Atom()
         newN.atomic_num = 7
         newN.symbol = "N"
-        newN.id = self.num_atoms + 1
+        # newN.id = self.num_atoms + 1
         newN.coord = (h.coord * 2) - c1.coord
         
         # First called BeginModify to stop reindexing at every step
-        self.start_modify()
-        
+        # self.start_modify()
+
         self.del_atom(h.id)
-        self.add_atom(newC)
-        self.add_atom(newN)
+        newC.id = self.add_atom(newC)
+        newN.id = self.add_atom(newN)
+        print([a.id for a in self.neighbours[c1.id]])
         
         self.add_bond(c1.id, newC.id, 1)
         self.add_bond(newC.id, newN.id, 3)
-        
-        self.end_modify()
+        print([a.id for a in self.neighbours[c1.id]])
+        print([a.id for a in self.neighbours[newC.id]])
 
-        return self.find_atom(newC.coord)
+        # self.end_modify()
+
+        return self.atoms[newC.id]
 
 
 if __name__ == "__main__":
@@ -79,7 +81,7 @@ if __name__ == "__main__":
     builder.Build(a)
 
     mol = Nitrile(ob2qca(a))
-    mol.find_cycles()
+    mol.get_sites(CycleSelection.CYCLES)
     c1, c2, h = mol.get_neighbours(0)
 
     cn = mol.generate_new_compound(c1, c2, h)
