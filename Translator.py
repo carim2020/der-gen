@@ -3,9 +3,8 @@ from Molecule import Molecule
 from Helper import Vector3
 from Atom import Atom
 from copy import copy
-from typing import List, Dict
-import os
-
+from typing import Dict
+from Definitions import ATOMIC_SYMBOLS
 
 __author__ = "Ilia Kichev"
 __credits__ = ["Ilia Kichev", "Lyuben Borislavov", "Alia Tadjer"]
@@ -15,15 +14,7 @@ __email__ = "ikichev@uni-sofia.bg"
 __status__ = "Prototype"
 
 
-SYMBOLS = dict()
-WORK_FOLDER = "."
-with open(os.path.join(WORK_FOLDER, "AtomicSymbolDict.txt"), "r") as f:
-    for line in f.readlines():
-        (k, v) = line.split('\t')
-        SYMBOLS[int(k)] = v[:-1]
-
-
-def qca2ob(mol: Molecule) -> ob.OBMol:
+def dergen2ob(mol: Molecule) -> ob.OBMol:
     out = ob.OBMol()
     rekey: Dict[int, int] = dict()
     indexer = 1
@@ -49,7 +40,7 @@ def qca2ob(mol: Molecule) -> ob.OBMol:
     return copy(out)
 
 
-def ob2qca(obm: ob.OBMol) -> Molecule:
+def ob2dergen(obm: ob.OBMol) -> Molecule:
     out_mol = Molecule()
     rekey = dict()
     new_index = 0
@@ -57,7 +48,7 @@ def ob2qca(obm: ob.OBMol) -> Molecule:
         new_atom = Atom()
         new_atom.coord = Vector3(atom.x(), atom.y(), atom.z())
         new_atom.atomic_num = atom.GetAtomicNum()
-        new_atom.symbol = SYMBOLS[new_atom.atomic_num]
+        new_atom.symbol = ATOMIC_SYMBOLS[new_atom.atomic_num]
         new_atom.atomic_mass = atom.GetAtomicMass()
         out_mol.add_atom(new_atom)
         rekey[atom.GetIdx()] = new_index
@@ -74,14 +65,14 @@ def ob2qca(obm: ob.OBMol) -> Molecule:
     return copy(out_mol)
 
 
-def get_inchi_key(molecule: Molecule) -> str:
-
-    ob_mol = qca2ob(molecule)
-    conv = ob.OBConversion()
-    conv.SetInAndOutFormats("mol", "inchikey")
-
-    res = conv.WriteString(ob_mol)
-    return res
+# def get_inchi_key(molecule: Molecule) -> str:
+#
+#     ob_mol = dergen2ob(molecule)
+#     conv = ob.OBConversion()
+#     conv.SetInAndOutFormats("mol", "inchikey")
+#
+#     res = conv.WriteString(ob_mol)
+#     return res
 
 
 if __name__ == "__main__":
@@ -95,7 +86,7 @@ if __name__ == "__main__":
     builder = ob.OBBuilder()
     builder.Build(obm)
 
-    mol = ob2qca(obm)
+    mol = ob2dergen(obm)
     # for atom database mol.atoms:
     #     index = mol.atoms[atom].id
     #     print("Atom's {} neighbours:".format(index))

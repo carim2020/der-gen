@@ -1,26 +1,17 @@
 # TODO: Some refactoring is needed. The Molecule class has too many responsibilities.
-import enum
 
 from Atom import Atom
-from copy import copy
 from Helper import Vector3
-from enum import Enum
+from Definitions import CycleSelection
 from typing import Dict, List
-
-# from abc import ABC, abstractmethod
+from copy import copy
+from openbabel import openbabel
 
 __author__ = "Ilia Kichev"
 __credits__ = ["Ilia Kichev", "Lyuben Borislavov", "Alia Tadjer"]
 __version__ = "1.1.0"
 __maintainer__ = "Ilia Kichev"
 __email__ = "ikichev@uni-sofia.bg"
-__status__ = "Prototype"
-
-
-class CycleSelection(Enum):
-    CYCLES = enum.auto()
-    NON_CYCLES = enum.auto()
-    ALL = enum.auto()
 
 
 class Molecule:
@@ -60,8 +51,6 @@ class Molecule:
         for ind in set(n_ind):
             self.__neighbours[ind].remove(self.__atoms[index])
         self.__atoms.pop(index)
-        # if not self.__is_modified:
-        #     self.reindex()
 
     # Returns reference to the atom!
     def get_atom(self, index: int) -> Atom:
@@ -86,44 +75,6 @@ class Molecule:
         self.__neighbours[ind_a].remove(self.__atoms[ind_b])
         self.__neighbours[ind_b].remove(self.__atoms[ind_a])
 
-    #
-    # def reindex(self) -> None:
-    #     rekey = dict()
-    #     for new_ind, cur_id in enumerate(list(self.__atoms.keys())):
-    #         rekey[cur_id] = new_ind
-    #     con_matrix = []
-    #     for i in range(self.num_atoms):
-    #         con_matrix.append([0] * self.num_atoms)
-    #     bond_keys = self.__bonds.keys()
-    #     for bond in bond_keys:
-    #         indexes = [int(i) for i in bond.split("_")]
-    #         con_matrix[rekey[indexes[0]]][rekey[indexes[1]]] = self.__bonds[bond]
-    #     # Rekey atoms
-    #     self.__atoms = {rekey[k]: atom for (k, atom) in self.__atoms.items()}
-    #     for k in self.__atoms:
-    #         self.__atoms[k].id = k
-    #     # Rekey bonds
-    #     self.__bonds.clear()
-    #     self.__neighbours.clear()
-    #     for i in range(self.num_atoms):
-    #         self.__neighbours[i] = []
-    #     # Repopulate bonds
-    #     for i in range(self.num_atoms):
-    #         for j in range(i, self.num_atoms):
-    #             if con_matrix[i][j]:
-    #                 self.add_bond(i, j, con_matrix[i][j])
-    #     self.__indexer = len(self.__atoms.keys())
-    #     # Recalculate indexes database cycles
-    #     for atom in self.__sites:
-    #         atom.id = rekey[atom.id]
-
-    # def start_modify(self) -> None:
-    #     self.__is_modified = True
-    #
-    # def end_modify(self) -> None:
-    #     self.__is_modified = False
-    #     self.reindex()
-
     @property
     def num_atoms(self) -> int:
         return len(self.__atoms)
@@ -146,7 +97,18 @@ class Molecule:
 
     @property
     def inchi_key(self) -> str:
+        if self.__inchi_key == "":
+            ob_mol = dergen2ob(self)
+            conv = openbabel.OBConversion()
+            conv.SetInAndOutFormats("mol", "inchikey")
+
+            self.__inchi_key = conv.WriteString(ob_mol)
+
         return self.__inchi_key
+
+    @inchi_key.setter
+    def inchi_key(self, key: str) -> None:
+        self.__inchi_key = key
 
     def __find_cycles(self) -> list[Atom]:
         passed: list[int] = [0] * (self.num_atoms + 1)
@@ -159,12 +121,10 @@ class Molecule:
         stack = [list(self.__atoms.values())[0]]
         parent[stack[0].id] = stack[0].id
         passed[stack[0].id] = 1
-        # print("Find Cycles ")
         while len(stack) != 0:  # while the stack is not empty
             # get the first element of the stack
             cur = stack[-1]
             stack.pop()
-            # print(cur.id)
             for atom in self.__neighbours[cur.id]:
                 # Cycle check
                 if passed[atom.id] == 1:
@@ -221,7 +181,6 @@ class Molecule:
                 h = atom
         return c1, c2, h
 
-    # @abstractmethod
     def generate_new_compound(self, c1: Atom, c2: Atom, h: Atom) -> Atom:
         """
                 This method should be inherited from all the classes and used to
@@ -240,8 +199,6 @@ class Molecule:
         hydrogen.symbol = "H"
         hydrogen.atomic_num = 1
 
-        # self.start_modify()
-
         def remove(parent: Atom, substituent: Atom):
             neigh = copy(self.neighbours[substituent.id])
             for atom in neigh:
@@ -256,16 +213,16 @@ class Molecule:
         new_id = self.add_atom(hydrogen)
         self.add_bond(c.id, new_id, 1)
 
-        # self.end_modify()
+    def __eq__(self, other: 'Molecule'):
+        return other.inchi_key == self.inchi_key
 
 
 if __name__ == "__main__":
 
     import os
-    from Translator import ob2qca, qca2ob
+    from Translator import ob2dergen, dergen2ob
     from openbabel import openbabel as ob
-
-    WORK_FOLDER = os.getcwd()
+    from Definitions import ROOT_DIR
 
     # Testing  code
     a = ob.OBMol()
@@ -276,8 +233,8 @@ if __name__ == "__main__":
     builder = ob.OBBuilder()
     builder.Build(a)
 
-    mol = ob2qca(a)
+    mol = ob2dergen(a)
     mol.get_sites(CycleSelection.CYCLES)
 
-    obm = qca2ob(mol)
-    conv.WriteFile(obm, os.path.join(WORK_FOLDER, "original.svg"))
+    obm = dergen2ob(mol)
+    conv.WriteFile(obm, os.path.join(ROOT_DIR, "original.svg"))

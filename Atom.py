@@ -6,17 +6,15 @@ __credits__ = ["Ilia Kichev", "Lyuben Borislavov", "Alia Tadjer"]
 __version__ = "1.1.0"
 __maintainer__ = "Ilia Kichev"
 __email__ = "ikichev@uni-sofia.bg"
-__status__ = "Prototype"
 
 
 class Atom:
     def __init__(self):
-        self.__coord = Vector3()
-        # self.__type = str()
-        self.__atomicMass = 0
-        self.__atomicNumber = 0
-        self.__symbol = str()
-        self.__index = 0
+        self.__coord: Vector3 = Vector3()
+        self.__atomicMass: float = 0
+        self.__atomicNumber: int = 0
+        self.__symbol: str = str()
+        self.__index: int = 0
     
     def __str__(self):
         return "{}\t{}".format(self.symbol, self.coord)
@@ -31,14 +29,7 @@ class Atom:
         if not isinstance(coordinates, Vector3):
             raise TypeError("Parameter coordinates is not Vector3")
         self.__coord = coordinates
-    
-    # @property
-    # def type(self) -> str:
-    #     return self.__type
-    #
-    # @type.setter
-    # def type(self, t: str):
-    #     self.__type = t
+
     @property
     def symbol(self) -> str:
         return self.__symbol
@@ -48,7 +39,7 @@ class Atom:
         if not isinstance(s, str):
             raise TypeError("Parameter s is not string")
         self.__symbol = s
-    
+
     @property
     def atomic_num(self) -> int:
         return self.__atomicNumber
@@ -60,7 +51,7 @@ class Atom:
         self.__atomicNumber = z
     
     @property
-    def atomic_mass(self):
+    def atomic_mass(self) -> float:
         return self.__atomicMass
     
     @atomic_mass.setter
@@ -79,20 +70,4 @@ class Atom:
             raise TypeError("The parameter ind is not int")
         self.__index = ind
 
-
-if __name__ == "__main__":
-    a = Atom()
-    a.symbol = 'C'
-    a.atomic_num = 6
-
-    b = Atom()
-    b.symbol = 'O'
-    b.atomic_num = 8
-
-    c = Atom()
-    c.symbol = 'O'
-    c.atomic_num = 8
-
-    a.neighbours = [b, c, b]
-
-    print(a)
+    

@@ -11,7 +11,6 @@ __credits__ = ["Ilia Kichev", "Lyuben Borislavov", "Alia Tadjer"]
 __version__ = "1.1.0"
 __maintainer__ = "Ilia Kichev"
 __email__ = "ikichev@uni-sofia.bg"
-__status__ = "Prototype"
 
 
 class Propylyl(Molecule):
@@ -93,7 +92,7 @@ class Propylyl(Molecule):
 if __name__ == "__main__":
 
     from os.path import join
-    from Translator import ob2qca, qca2ob
+    from Translator import ob2dergen, dergen2ob
     from openbabel import openbabel as ob
 
     WORK_FOLDER = os.path.join(os.getcwd(), 'out')
@@ -107,16 +106,16 @@ if __name__ == "__main__":
     builder = ob.OBBuilder()
     builder.Build(a)
 
-    mol = Propylyl(ob2qca(a))
+    mol = Propylyl(ob2dergen(a))
     mol.get_sites(CycleSelection.CYCLES)
     # print([(m.id, m.symbol) for m in mol.cycles])
     c1, c2, h = mol.get_neighbours(0)
 
     cn = mol.generate_new_compound(c1, c2, h)
 
-    obm = qca2ob(mol)
+    obm = dergen2ob(mol)
     conv.WriteFile(obm, os.path.join(WORK_FOLDER, 'out_2.svg'))
 
     mol.revert_to_original(c1, cn)
-    obm = qca2ob(mol)
+    obm = dergen2ob(mol)
     conv.WriteFile(obm, os.path.join(WORK_FOLDER, "original.svg"))

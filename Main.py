@@ -1,29 +1,24 @@
-from Propylyl import Propylyl
-from Molecule import Molecule
-from Translator import ob2qca, qca2ob, get_inchi_key
-from openbabel import openbabel as ob
 import os
 import copy
 # import time
+
+from Propylyl import Propylyl
+from Molecule import Molecule
+from Translator import ob2dergen, dergen2ob
+from openbabel import openbabel as ob
+from Definitions import OUT_FOLDER, IN_FOLDER, OUT_FOLDER_SVG, INPUT_FORMAT, OUTPUT_FORMAT, OUTPUT_FORMAT_SVG
+
 
 __author__ = "Ilia Kichev"
 __credits__ = ["Ilia Kichev", "Lyuben Borislavov", "Alia Tadjer"]
 __version__ = "1.1.0"
 __maintainer__ = "Ilia Kichev"
 __email__ = "ikichev@uni-sofia.bg"
-__status__ = "Prototype"
+
 
 if __name__ == "__main__":
     # beginning = time.monotonic()
     # Set up for batch processing
-    WORK_FOLDER = "."
-
-    OUT_FOLDER = os.path.join(WORK_FOLDER, "out")
-    OUT_FOLDER_SVG = os.path.join(WORK_FOLDER, "out_svg")
-    IN_FOLDER = os.path.join(WORK_FOLDER, "in")
-    OUTPUT_FORMAT = "xyz"
-    OUTPUT_FORMAT_SVG = "svg"
-    INPUT_FORMAT = "xyz"
 
     conv = ob.OBConversion()
     conv.SetInAndOutFormats(INPUT_FORMAT, OUTPUT_FORMAT)
@@ -43,7 +38,7 @@ if __name__ == "__main__":
             ob_mol = ob.OBMol()
             conv.ReadFile(ob_mol, os.path.join(IN_FOLDER, filename))
 
-            nit = Propylyl(ob2qca(ob_mol))
+            nit = Propylyl(ob2dergen(ob_mol))
             # print([(a, nit.atoms[a].symbol) for a database nit.atoms])
             # print(nit.bonds)
             nit.get_sites()
@@ -77,7 +72,7 @@ if __name__ == "__main__":
     # beginning = time.monotonic()
 
     for mol in unique_files:
-        obm = qca2ob(unique_files[mol][1])
+        obm = dergen2ob(unique_files[mol][1])
         conv.WriteFile(obm, os.path.join(OUT_FOLDER, "{}.{}".format(unique_files[mol][0], OUTPUT_FORMAT)))
         conv_svg.WriteFile(obm, os.path.join(OUT_FOLDER_SVG, "{}.{}".format(unique_files[mol][0], OUTPUT_FORMAT_SVG)))
 

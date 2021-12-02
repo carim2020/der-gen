@@ -9,7 +9,6 @@ __credits__ = ["Ilia Kichev", "Lyuben Borislavov", "Alia Tadjer"]
 __version__ = "1.1.0"
 __maintainer__ = "Ilia Kichev"
 __email__ = "ikichev@uni-sofia.bg"
-__status__ = "Prototype"
 
 
 class Nitrile(Molecule):
@@ -66,7 +65,7 @@ class Nitrile(Molecule):
 if __name__ == "__main__":
 
     from os.path import join
-    from Translator import ob2qca, qca2ob
+    from Translator import ob2dergen, dergen2ob
     from openbabel import openbabel as ob
 
     WORK_FOLDER = os.getcwd()
@@ -80,15 +79,15 @@ if __name__ == "__main__":
     builder = ob.OBBuilder()
     builder.Build(a)
 
-    mol = Nitrile(ob2qca(a))
+    mol = Nitrile(ob2dergen(a))
     mol.get_sites(CycleSelection.CYCLES)
     c1, c2, h = mol.get_neighbours(0)
 
     cn = mol.generate_new_compound(c1, c2, h)
 
-    obm = qca2ob(mol)
+    obm = dergen2ob(mol)
     conv.WriteFile(obm, os.path.join(WORK_FOLDER, 'out_2.svg'))
 
     mol.revert_to_original(c1, cn)
-    obm = qca2ob(mol)
+    obm = dergen2ob(mol)
     conv.WriteFile(obm, os.path.join(WORK_FOLDER, "original.svg"))

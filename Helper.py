@@ -19,9 +19,9 @@ class Vector3:
                 @param x: The x coordinate
                 @param y: The y coordinate
                 @param z: The z coordinate"""
-        self.x = x
-        self.y = y
-        self.z = z
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
 
     @classmethod
     def from_numpy(cls, nparray: np.array):
@@ -68,22 +68,26 @@ class Vector3:
         self.x += other.x
         self.y += other.y
         self.z += other.z
+        return self
     
     def __isub__(self, other):
         self.x -= other.x
         self.y -= other.y
         self.z -= other.z
+        return self
     
     def __imul__(self, num: float):
         self.x *= num
         self.y *= num
         self.z *= num
+        return self
     
     def __itruediv__(self, num: float):
         self.x /= num
         self.y /= num
         self.z /= num
-    
+        return self
+
     def __eq__(self, other):
         temporary = self - other
         if temporary.length_2() < Vector3.MIN_DIST:
@@ -109,14 +113,3 @@ def cross_product(lhs: Vector3, rhs: Vector3) -> Vector3:
 
 def dot_product(lhs: Vector3, rhs: Vector3) -> float:
     return float(np.dot(lhs.to_numpy(), rhs.to_numpy()))
-
-
-if __name__ == "__main__":
-    a = Vector3(2, -1, 4)
-    b = Vector3(-1, -2, -4)
-    print(cross_product(a, b))  # [-12, 4, -3]
-    print(dot_product(a, b))  # -16
-
-    v = Vector3(1.88, -2.85, 3.07)
-    u = Vector3(3.04, 6.58, 4.26)
-    print(v.rotate_around_axis(u, -math.pi/4))  # -1.39, -1.91, 3.94
