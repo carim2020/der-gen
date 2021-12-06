@@ -1,8 +1,9 @@
 # TODO: Some refactoring is needed. The Molecule class has too many responsibilities.
+# TODO: Make some kind of memory and speed benchmark for a substantial load (Not 3 molecules but 300)
 
 from Atom import Atom
 from Helper import Vector3
-from Definitions import CycleSelection
+from Definitions import CycleSelection, BondType
 from typing import Dict, List
 from copy import copy
 from openbabel import openbabel
@@ -18,14 +19,15 @@ class Molecule:
 
     def __init__(self):
         """
-            Constructor for the Molecule class with optional copy function
+            Constructor for the Molecule class.
         """
-        self.__sites = []  # Contains the atoms database cycles
-        self.__atoms: Dict[int, Atom] = dict()  # Dictionary of all the atoms database the molecule
-        self.__bonds: Dict[str, int] = dict()  # Dictionary of all the bonds database the molecule
+        # IMPORTANT: Everything except the dictionary for atoms uses their indexes as they are
+        # unique to every atom in the molecule.
+        self.__atoms: Dict[int, Atom] = dict()  # Dictionary of all the atoms' database the molecule
+        self.__bonds: Dict[str, BondType] = dict()  # Dictionary of all the bonds' database the molecule
+        self.__sites: List[int] = []  # Contains the atoms' database cycles
         self.__indexer = 0
-        self.__is_modified = False
-        self.__neighbours: Dict[int, List[Atom]] = dict()  # Dictionary of lists of all the neighbours of the atoms
+        self.__neighbours: Dict[int, List[int]] = dict()  # Dictionary of lists of all the neighbours of the atoms
         self.__inchi_key: str = ""
 
     def add_atom(self, atom: Atom) -> int:
@@ -49,7 +51,7 @@ class Molecule:
         for b in d_b:
             self.__bonds.pop(b)
         for ind in set(n_ind):
-            self.__neighbours[ind].remove(self.__atoms[index])
+            self.__neighbours[ind].remove(index)
         self.__atoms.pop(index)
 
     # Returns reference to the atom!
@@ -63,36 +65,36 @@ class Molecule:
             if self.__atoms[atom].coord == coordinates:
                 return self.__atoms[atom]
 
-    def add_bond(self, ind_a: int, ind_b: int, bond_type: int) -> None:
+    def add_bond(self, ind_a: int, ind_b: int, bond_type: BondType) -> None:
         self.__bonds["{}_{}".format(ind_a, ind_b)] = bond_type
         self.__bonds["{}_{}".format(ind_b, ind_a)] = bond_type
-        self.__neighbours[ind_a].append(self.__atoms[ind_b])
-        self.__neighbours[ind_b].append(self.__atoms[ind_a])
+        self.__neighbours[ind_a].append(ind_b)
+        self.__neighbours[ind_b].append(ind_a)
 
     def del_bond(self, ind_a: int, ind_b: int) -> None:
         self.__bonds.pop("{}_{}".format(ind_a, ind_b))
         self.__bonds.pop("{}_{}".format(ind_b, ind_a))
-        self.__neighbours[ind_a].remove(self.__atoms[ind_b])
-        self.__neighbours[ind_b].remove(self.__atoms[ind_a])
+        self.__neighbours[ind_a].remove(ind_b)
+        self.__neighbours[ind_b].remove(ind_a)
 
     @property
     def num_atoms(self) -> int:
         return len(self.__atoms)
 
     @property
-    def atoms(self) -> dict[int, Atom]:
+    def atoms(self) -> Dict[int, Atom]:
         return copy(self.__atoms)
 
     @property
-    def bonds(self) -> dict[str, int]:
+    def bonds(self) -> Dict[str, BondType]:
         return copy(self.__bonds)
 
     @property
-    def sites(self) -> list[int]:
+    def sites(self) -> List[int]:
         return copy(self.__sites)
 
     @property
-    def neighbours(self) -> Dict[int, List[Atom]]:
+    def neighbours(self) -> Dict[int, List[int]]:
         return self.__neighbours
 
     @property
@@ -110,13 +112,13 @@ class Molecule:
     def inchi_key(self, key: str) -> None:
         self.__inchi_key = key
 
-    def __find_cycles(self) -> list[Atom]:
-        passed: list[int] = [0] * (self.num_atoms + 1)
-        mark: list[bool] = [False] * (self.num_atoms + 1)
-        parent: list[int] = [0] * (self.num_atoms + 1)
+    def __find_cycles(self) -> List[int]:
+        passed: Dict[int, int] = {_: 0 for _ in self.__atoms}
+        mark: Dict[int, bool] = {_: False for _ in self.__atoms}
+        parent: Dict[int, int] = {_: -1 for _ in self.__atoms}
 
-        if len(mark) == 1:
-            raise TypeError("Molecule has no atoms")
+        if len(mark) == 0:
+            raise RuntimeError("Molecule has no atoms")
         # Get the first atom
         stack = [list(self.__atoms.values())[0]]
         parent[stack[0].id] = stack[0].id
@@ -125,29 +127,29 @@ class Molecule:
             # get the first element of the stack
             cur = stack[-1]
             stack.pop()
-            for atom in self.__neighbours[cur.id]:
+            for atom_id in self.__neighbours[cur.id]:
                 # Cycle check
-                if passed[atom.id] == 1:
+                if passed[atom_id] == 1:
                     # print("Cycle found: {}".format(cur.id))
                     temp = cur.id
-                    mark[atom.id] = True
+                    mark[atom_id] = True
                     mark[temp] = True
-                    while temp != parent[atom.id]:
+                    while temp != parent[atom_id]:
                         mark[temp] = True
                         temp = parent[temp]
                     mark[temp] = True
                     # print(self.__atoms[temp].coord)
 
                 # Add the neighbours that are not yet discovered
-                if passed[atom.id] == 0:
-                    parent[atom.id] = cur.id
-                    passed[atom.id] = 1
-                    stack.append(atom)
+                if passed[atom_id] == 0:
+                    parent[atom_id] = cur.id
+                    passed[atom_id] = 1
+                    stack.append(self.__atoms[atom_id])
 
             passed[cur.id] = 2
 
         # Update the cycles list
-        cycles: list[Atom] = [self.__atoms[ind] for ind, m in enumerate(mark) if m]
+        cycles: List[int] = [ind for ind, m in enumerate(mark) if m]
         return copy(cycles)
 
     def get_sites(self, selection: CycleSelection) -> None:
@@ -170,15 +172,15 @@ class Molecule:
         # print("Get Neighbour")
         c2 = None
         h = None
-        c1 = self.__sites[index]
+        c1 = self.__atoms[self.__sites[index]]
 
-        for atom in self.__neighbours[c1.id]:
-            if atom.atomic_num != 1:
-                c2 = atom
+        for atom_id in self.__neighbours[self.__sites[index]]:
+            if self.__atoms[atom_id].atomic_num != 1:
+                c2 = self.__atoms[atom_id]
                 # print("Carbon")
-            elif atom.atomic_num == 1:
+            elif self.__atoms[atom_id].atomic_num == 1:
                 # print("Hydrogen")
-                h = atom
+                h = self.__atoms[atom_id]
         return c1, c2, h
 
     def generate_new_compound(self, c1: Atom, c2: Atom, h: Atom) -> Atom:
@@ -191,7 +193,7 @@ class Molecule:
 
     def revert_to_original(self, c: Atom, sub: Atom) -> None:
         """
-                This method reverts back to the original molecule.
+                This method reverts to the original molecule.
                 Useful, will there be any need for iteration.
         """
         hydrogen = Atom()
@@ -201,9 +203,9 @@ class Molecule:
 
         def remove(parent: Atom, substituent: Atom):
             neigh = copy(self.neighbours[substituent.id])
-            for atom in neigh:
-                if atom.id != parent.id:
-                    remove(substituent, atom)
+            for atom_id in neigh:
+                if atom_id != parent.id:
+                    remove(substituent, self.__atoms[atom_id])
 
             if len(self.neighbours[substituent.id]) < 2:
                 self.del_atom(substituent.id)
@@ -211,7 +213,7 @@ class Molecule:
         remove(c, sub)
 
         new_id = self.add_atom(hydrogen)
-        self.add_bond(c.id, new_id, 1)
+        self.add_bond(c.id, new_id, BondType.SINGLE)
 
     def __eq__(self, other: 'Molecule'):
         return other.inchi_key == self.inchi_key
@@ -235,6 +237,8 @@ if __name__ == "__main__":
 
     mol = ob2dergen(a)
     mol.get_sites(CycleSelection.CYCLES)
+    print(mol.sites)
+    print([mol.get_atom(key).])
 
     obm = dergen2ob(mol)
     conv.WriteFile(obm, os.path.join(ROOT_DIR, "original.svg"))

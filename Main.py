@@ -26,7 +26,7 @@ if __name__ == "__main__":
     conv_svg = ob.OBConversion()
     conv_svg.SetInAndOutFormats(INPUT_FORMAT, OUTPUT_FORMAT_SVG)
 
-    output_files: list[(str, Molecule)] = []
+    output_files: List[(str, Molecule)] = []
 
     # timing = [time.monotonic() - beginning]
     # print("Initializing: {}".format(time.monotonic() - beginning))

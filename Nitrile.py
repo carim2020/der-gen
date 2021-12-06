@@ -2,6 +2,7 @@ import os
 
 from Molecule import Molecule, CycleSelection
 from Atom import Atom
+from Definitions import BondType
 
 
 __author__ = "Ilia Kichev"
@@ -52,8 +53,8 @@ class Nitrile(Molecule):
         newN.id = self.add_atom(newN)
         print([a.id for a in self.neighbours[c1.id]])
         
-        self.add_bond(c1.id, newC.id, 1)
-        self.add_bond(newC.id, newN.id, 3)
+        self.add_bond(c1.id, newC.id, BondType.SINGLE)
+        self.add_bond(newC.id, newN.id, BondType.TRIPLE)
         print([a.id for a in self.neighbours[c1.id]])
         print([a.id for a in self.neighbours[newC.id]])
 

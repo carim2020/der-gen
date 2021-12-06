@@ -1,0 +1,6 @@
+package:
+  name: der-gen
+  version: "1.0.0"
+
+source:
+  git_rev:

@@ -12,6 +12,12 @@ class TestVector3(unittest.TestCase):
         self.vector_y = Vector3(0, 1, 0)
         self.vector_z = Vector3(0, 0, 1)
 
+    def takeDown(self):
+        del self.vector
+        del self.vector_x
+        del self.vector_y
+        del self.vector_z
+
     def test_str(self):
         self.assertEqual(str(self.vector), "0.0\t0.0\t0.0")
         self.assertEqual(str(self.vector_x), "1.0\t0.0\t0.0")
@@ -133,5 +139,6 @@ class TestCrossAndDotProduct(unittest.TestCase):
         self.assertTrue(dot_product(self.a, self.b) == -16)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
+

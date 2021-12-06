@@ -46,7 +46,7 @@ class TestTranslator(unittest.TestCase):
 
         self.assertDictEqual({i: sorted([a.id for a in mol.neighbours[i]]) for i in mol.neighbours},
                              {i: sorted(ob_neighbours[i]) for i in ob_neighbours})
-        self.assertDictEqual(ob_bonds, mol.bonds)
+        self.assertDictEqual(ob_bonds, {key: mol.bonds[key].value for key in mol.bonds})
 
     def test_dergen2ob(self):
         mol = ob2dergen(self.obm)

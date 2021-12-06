@@ -22,3 +22,21 @@ class CycleSelection(Enum):
     CYCLES = auto()
     NON_CYCLES = auto()
     ALL = auto()
+
+
+class BondType(Enum):
+    SINGLE = 1
+    DOUBLE = 2
+    TRIPLE = 3
+    AROMATIC = 5
+
+    @staticmethod
+    def from_ob_bond_bype(bond_type: int) -> 'BondType':
+        if bond_type == BondType.SINGLE.value:
+            return BondType.SINGLE
+        elif bond_type == BondType.DOUBLE.value:
+            return BondType.DOUBLE
+        elif bond_type == BondType.TRIPLE.value:
+            return BondType.TRIPLE
+        elif bond_type == BondType.AROMATIC.value:
+            return BondType.AROMATIC

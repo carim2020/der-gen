@@ -4,7 +4,7 @@ from Helper import Vector3
 from Atom import Atom
 from copy import copy
 from typing import Dict
-from Definitions import ATOMIC_SYMBOLS
+from Definitions import ATOMIC_SYMBOLS, BondType
 
 __author__ = "Ilia Kichev"
 __credits__ = ["Ilia Kichev", "Lyuben Borislavov", "Alia Tadjer"]
@@ -35,7 +35,7 @@ def dergen2ob(mol: Molecule) -> ob.OBMol:
         ind_b = rekey[ind[1]]
         bond_set.add((min(ind_a, ind_b), max(ind_a, ind_b), mol.bonds[b]))
     for b in bond_set:
-        out.AddBond(b[0], b[1], b[2])
+        out.AddBond(b[0], b[1], b[2].value)
     
     return copy(out)
 
@@ -60,40 +60,6 @@ def ob2dergen(obm: ob.OBMol) -> Molecule:
         order = bond.GetBondOrder()
         bond_set.add((min(beg, end), max(beg, end), order))
     for bond in bond_set:
-        out_mol.add_bond(bond[0], bond[1], bond[2])
-    
+        out_mol.add_bond(bond[0], bond[1], BondType.from_ob_bond_bype(bond[2]))
+
     return copy(out_mol)
-
-
-# def get_inchi_key(molecule: Molecule) -> str:
-#
-#     ob_mol = dergen2ob(molecule)
-#     conv = ob.OBConversion()
-#     conv.SetInAndOutFormats("mol", "inchikey")
-#
-#     res = conv.WriteString(ob_mol)
-#     return res
-
-
-if __name__ == "__main__":
-    # Testing
-    conv = ob.OBConversion()
-    conv.SetInAndOutFormats('smi', 'svg')
-
-    obm = ob.OBMol()
-    conv.ReadString(obm, "C1=CC=C2C=CC=CC2=C1")
-    obm.AddHydrogens()
-    builder = ob.OBBuilder()
-    builder.Build(obm)
-
-    mol = ob2dergen(obm)
-    # for atom database mol.atoms:
-    #     index = mol.atoms[atom].id
-    #     print("Atom's {} neighbours:".format(index))
-    #     for a database mol.neighbours[index]:
-    #         print(a.id)
-
-    # obm2 = qca2ob(mol)
-    # conv.WriteFile(obm2, os.path.join(WORK_FOLDER, 'out.svg'))
-    print(get_inchi_key(mol))
-    print("1S/C10H8/c1-2-6-10-8-4-3-7-9(10)5-1/h1-8H ")

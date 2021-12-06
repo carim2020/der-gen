@@ -13,6 +13,9 @@ class TestAtom(unittest.TestCase):
         self.atom.atomic_mass = 12.0
         self.atom.id = 2
 
+    def takeDown(self):
+        del self.atom
+
     def test_init(self) -> None:
         self.assertIsInstance(self.atom, Atom)
 
@@ -57,6 +60,5 @@ class TestAtom(unittest.TestCase):
         self.atom.id = 2
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
-
