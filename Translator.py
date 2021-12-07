@@ -24,7 +24,7 @@ def dergen2ob(mol: Molecule) -> ob.OBMol:
         atom.SetVector(mol_atom.coord.x, mol_atom.coord.y, mol_atom.coord.z)
         atom.SetAtomicNum(mol_atom.atomic_num)
         atom.SetIdx(indexer)
-        rekey[mol_atom.id] = indexer
+        rekey[a] = indexer
         indexer += 1
         out.AddAtom(atom)
     

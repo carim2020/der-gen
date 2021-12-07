@@ -1,9 +1,10 @@
 import math
 import os
 
-from Molecule import Molecule, CycleSelection
+from Definitions import ATOMIC_SYMBOLS, CycleSelection, BondType
+from Molecule import Molecule
 from Atom import Atom
-from Helper import cross_product, dot_product, Vector3
+from Helper import cross_product
 
 
 __author__ = "Ilia Kichev"
@@ -27,66 +28,54 @@ class Propylyl(Molecule):
         for b in bond_set:
             self.add_bond(b[0], b[1], b[2])
 
-    def generate_new_compound(self, c1: Atom, c2: Atom, h: Atom):
+    def generate_new_compound(self, c1_id: int, c2_id: int, h_id: int):
         """
                 Extension of the Molecule class to create propylyl compounds
-                @param c1: Origin
-                @param c2: Child of C1
-                @param h: Child of C1
+                @param c1_id: Origin
+                @param c2_id: Child of C1
+                @param h_id: Child of C1
         """
 
-        bond_vector = h.coord - c1.coord
+        bond_vector = self.get_atom(h_id).coord - self.get_atom(c1_id).coord
         bond_vector = bond_vector / bond_vector.length()
 
-        norm_vector = cross_product(h.coord - c1.coord, c2.coord - c1.coord)
+        norm_vector = cross_product(self.get_atom(h_id).coord - self.get_atom(c1_id).coord,
+                                    self.get_atom(c2_id).coord - self.get_atom(c1_id).coord)
         norm_vector = norm_vector / norm_vector.length()
 
-        new_c1 = Atom()
-        new_c1.atomic_num = 6
-        new_c1.symbol = "C"
-        new_c1.id = self.num_atoms
-        new_c1.coord = c1.coord + bond_vector * 1.5  # a little bit shorter than sp3 bond
-        
-        new_c2 = Atom()
-        new_c2.atomic_num = 6
-        new_c2.symbol = "C"
-        new_c2.id = self.num_atoms + 1
-        new_c2.coord = new_c1.coord + bond_vector * 1.37  # sp-sp bond
+        new_c1 = Atom(atomic_number=6, symbol=ATOMIC_SYMBOLS[6])
+        new_c1.coord = self.get_atom(c1_id).coord + bond_vector * 1.5  # a bit shorter than sp3 bond
+        new_c1_id = self.num_atoms
 
-        new_c3 = Atom()
-        new_c3.atomic_num = 6
-        new_c3.symbol = "C"
-        new_c3.id = self.num_atoms + 2
+        new_c2 = Atom(atomic_number=6, symbol=ATOMIC_SYMBOLS[6])
+        new_c2.coord = new_c1.coord + bond_vector * 1.37  # sp-sp bond
+        new_c2_id = self.num_atoms + 1
+
+        new_c3 = Atom(atomic_number=6, symbol=ATOMIC_SYMBOLS[6])
         new_c3.coord = new_c2.coord + bond_vector * 1.46  # sp-sp3 bond bond
+        new_c3_id = self.num_atoms + 2
 
         new_H_vec = bond_vector * math.cos(math.radians(70)) + norm_vector * math.sin(math.radians(70))
 
-        new_H = [Atom(), Atom(), Atom()]
+        new_H = [Atom(atomic_number=1, symbol=ATOMIC_SYMBOLS[1]),
+                 Atom(atomic_number=1, symbol=ATOMIC_SYMBOLS[1]),
+                 Atom(atomic_number=1, symbol=ATOMIC_SYMBOLS[1])]
         for ind, hydro in enumerate(new_H):
-            hydro.atomic_num = 1
-            hydro.symbol = "H"
-            hydro.id = self.num_atoms + ind + 3
             hydro.coord = new_c3.coord + new_H_vec.rotate_around_axis(bond_vector, 2/3*math.pi * ind)
 
-        # First called BeginModify to stop reindexing at every step
-        # self.start_modify()
-
-        self.del_atom(h.id)
+        self.del_atom(h_id)
         self.add_atom(new_c1)
         self.add_atom(new_c2)
         self.add_atom(new_c3)
-        for i in new_H:
-            self.add_atom(i)
+        new_H_id = [self.add_atom(_) for _ in new_H]
 
-        self.add_bond(c1.id, new_c1.id, 1)
-        self.add_bond(new_c1.id, new_c2.id, 3)
-        self.add_bond(new_c2.id, new_c3.id, 1)
-        for i in new_H:
-            self.add_bond(new_c3.id, i.id, 1)
-        
-        # self.end_modify()
+        self.add_bond(c1_id, new_c1_id, BondType.SINGLE)
+        self.add_bond(new_c1_id, new_c2_id, BondType.TRIPLE)
+        self.add_bond(new_c2_id, new_c3_id, BondType.SINGLE)
+        for ind in new_H_id:
+            self.add_bond(new_c3.id, ind, BondType.SINGLE)
 
-        return self.find_atom(new_c1.coord)
+        return new_c1_id
 
 
 if __name__ == "__main__":

@@ -28,13 +28,13 @@ class Reduced(Molecule):
             raise RuntimeError("There are no sites in this molecule. First generate them.")
 
         counter: int = 0
-        for atom in sites:
-            if len(self.neighbours[atom.id]) == 3:
-                for neigh_id in self.neighbours[atom.id]:
+        for atom_id in sites:
+            if len(self.neighbours[atom_id]) == 3:
+                for neigh_id in self.neighbours[atom_id]:
                     if self.get_atom(neigh_id).atomic_num == 8 and len(self.neighbours[neigh_id]) == 1:
 
-                        li = Atom(atomic_symbol=ATOMIC_SYMBOLS[atomic_number], atomic_number=atomic_number)
-                        bond_v: Vector3 = self.get_atom(neigh_id).coord - atom.coord
+                        li = Atom(symbol=ATOMIC_SYMBOLS[atomic_number], atomic_number=atomic_number)
+                        bond_v: Vector3 = self.get_atom(neigh_id).coord - self.get_atom(atom_id).coord
                         bond_v = bond_v / bond_v.length() * bond_length
                         li.coord = bond_v + self.get_atom(neigh_id).coord
                         li.id = self.add_atom(li)

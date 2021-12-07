@@ -26,41 +26,36 @@ class Nitrile(Molecule):
         for b in bond_set:
             self.add_bond(b[0], b[1], b[2])
 
-    def generate_new_compound(self, c1: Atom, c2: Atom, h: Atom):
+    def generate_new_compound(self, c1_id: int, c2_id: int, h_id: int) -> int:
         """
                 Extension of the Molecule class to create nitrile compounds
-                @param c1: Origin
-                @param c2: Child of C1
-                @param h: Child of C1
+                @param c1_id: Origin
+                @param c2_id: Child of C1
+                @param h_id: Child of C1
         """
-        newC = Atom()
-        newC.atomic_num = 6
-        newC.symbol = "C"
+        newC = Atom(symbol="C", atomic_number=6)
         # newC.id = self.num_atoms
-        newC.coord = h.coord
+        newC.coord = self.get_atom(h_id).coord
         
         newN = Atom()
         newN.atomic_num = 7
         newN.symbol = "N"
         # newN.id = self.num_atoms + 1
-        newN.coord = (h.coord * 2) - c1.coord
+        newN.coord = (self.get_atom(h_id).coord * 2) - self.get_atom(c1_id).coord
         
         # First called BeginModify to stop reindexing at every step
         # self.start_modify()
 
-        self.del_atom(h.id)
-        newC.id = self.add_atom(newC)
-        newN.id = self.add_atom(newN)
-        print([a.id for a in self.neighbours[c1.id]])
-        
-        self.add_bond(c1.id, newC.id, BondType.SINGLE)
-        self.add_bond(newC.id, newN.id, BondType.TRIPLE)
-        print([a.id for a in self.neighbours[c1.id]])
-        print([a.id for a in self.neighbours[newC.id]])
+        self.del_atom(h_id)
+        newC_id = self.add_atom(newC)
+        newN_id = self.add_atom(newN)
+
+        self.add_bond(c1_id, newC_id, BondType.SINGLE)
+        self.add_bond(newC_id, newN_id, BondType.TRIPLE)
 
         # self.end_modify()
 
-        return self.atoms[newC.id]
+        return newC_id
 
 
 if __name__ == "__main__":
