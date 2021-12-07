@@ -10,11 +10,11 @@ __email__ = "ikichev@uni-sofia.bg"
 
 class Atom:
     def __init__(self, coord: Vector3 = Vector3(), atomic_number: int = 0,
-                 atomic_symbol: str = "", atomic_mass: float = 0, index: int = 0):
+                 symbol: str = "", atomic_mass: float = 0, index: int = 0):
         self.__coord: Vector3 = coord
         self.__atomicMass: float = atomic_mass
         self.__atomicNumber: int = atomic_number
-        self.__symbol: str = atomic_symbol
+        self.__symbol: str = symbol
         self.__index: int = index
     
     def __str__(self):
@@ -61,15 +61,15 @@ class Atom:
             raise TypeError
         self.__atomicMass = am
     
-    @property
-    def id(self) -> int:
-        return self.__index
-    
-    @id.setter
-    def id(self, ind: int):
-        if not isinstance(ind, int):
-            raise TypeError("The parameter ind is not int")
-        self.__index = ind
+    # @property
+    # def id(self) -> int:
+    #     return self.__index
+    #
+    # @id.setter
+    # def id(self, ind: int):
+    #     if not isinstance(ind, int):
+    #         raise TypeError("The parameter ind is not int")
+    #     self.__index = ind
 
     def __eq__(self, other: 'Atom'):
         return self.__coord == other.coord and self.atomic_num == other.atomic_num and \

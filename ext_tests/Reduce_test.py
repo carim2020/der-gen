@@ -28,13 +28,13 @@ class TestReduced(unittest.TestCase):
 
         bl1 = red.get_atom(3).coord - red.get_atom(2).coord
         bl1 = bl1 / bl1.length() * 2.
-        li_1 = Atom(coord=red.get_atom(3).coord + bl1, atomic_symbol="Li", atomic_number=3)
+        li_1 = Atom(coord=red.get_atom(3).coord + bl1, symbol="Li", atomic_number=3)
         li_1.id = len(red.atoms)
 
         bl2 = red.get_atom(7).coord - red.get_atom(6).coord
         bl2 = bl2 / bl2.length() * 2
-        li_2 = Atom(coord=red.get_atom(7).coord + bl2, atomic_symbol="Li", atomic_number=3)
-        li_2.id = len(red.atoms) + 1
+        li_2 = Atom(coord=red.get_atom(7).coord + bl2, symbol="Li", atomic_number=3)
+        li_2_id = len(red.atoms) + 1
 
         old_atoms: Dict[int, Atom] = red.atoms
         old_atoms[li_1.id] = li_1
@@ -48,4 +48,6 @@ class TestReduced(unittest.TestCase):
             self.assertEqual(red.atoms[key].atomic_num, old_atoms[key].atomic_num)
             self.assertTrue(red.atoms[key].coord == old_atoms[key].coord)
             self.assertEqual(red.atoms[key].symbol, old_atoms[key].symbol)
-            self.assertEqual(red.atoms[key].id, old_atoms[key].id)
+
+if __name__ == "__main__":
+    unittest.main()

@@ -3,8 +3,8 @@
 
 from Atom import Atom
 from Helper import Vector3
-from Definitions import CycleSelection, BondType
-from typing import Dict, List
+from Definitions import CycleSelection, BondType, ATOMIC_SYMBOLS
+from typing import Dict, List, Tuple
 from copy import copy
 from openbabel import openbabel
 
@@ -22,17 +22,17 @@ class Molecule:
             Constructor for the Molecule class.
         """
         # IMPORTANT: Everything except the dictionary for atoms uses their indexes as they are
-        # unique to every atom in the molecule.
+        # unique to every atom in the molecule due to self.__indexer
         self.__atoms: Dict[int, Atom] = dict()  # Dictionary of all the atoms' database the molecule
         self.__bonds: Dict[str, BondType] = dict()  # Dictionary of all the bonds' database the molecule
         self.__sites: List[int] = []  # Contains the atoms' database cycles
-        self.__indexer = 0
+        self.__indexer = 0  # Used to assign unique index to every atom
         self.__neighbours: Dict[int, List[int]] = dict()  # Dictionary of lists of all the neighbours of the atoms
         self.__inchi_key: str = ""
 
     def add_atom(self, atom: Atom) -> int:
         self.__atoms[self.__indexer] = copy(atom)
-        self.__atoms[self.__indexer].id = self.__indexer
+        # self.__atoms[self.__indexer].id = self.__indexer
         self.__neighbours[self.__indexer] = []
         self.__indexer += 1
         return self.__indexer - 1
@@ -166,24 +166,24 @@ class Molecule:
             self.__sites = [self.__atoms[k] for k in self.__atoms
                             if self.__atoms[k].symbol != "H"]
 
-    def get_neighbours(self, index: int) -> tuple:
+    def get_neighbours(self, index: int) -> Tuple[int, int, int]:
         if index >= len(self.__sites):
-            raise IndexError("Index is out of the potential sites")
+            raise KeyError("Index is out of the potential sites")
         # print("Get Neighbour")
-        c2 = None
-        h = None
-        c1 = self.__atoms[self.__sites[index]]
+        c2_id: int = -1
+        h_id: int = -1
+        c1_id: int = self.__sites[index]
 
         for atom_id in self.__neighbours[self.__sites[index]]:
             if self.__atoms[atom_id].atomic_num != 1:
-                c2 = self.__atoms[atom_id]
+                c2_id = atom_id
                 # print("Carbon")
             elif self.__atoms[atom_id].atomic_num == 1:
                 # print("Hydrogen")
-                h = self.__atoms[atom_id]
-        return c1, c2, h
+                h_id = atom_id
+        return c1_id, c2_id, h_id
 
-    def generate_new_compound(self, c1: Atom, c2: Atom, h: Atom) -> Atom:
+    def generate_new_compound(self, c1_id: int, c2_id: int, h_id: int) -> int:
         """
                 This method should be inherited from all the classes and used to
                 form new substituent on the targeted place by changing the H atom
@@ -191,29 +191,27 @@ class Molecule:
         """
         raise NotImplementedError("Overwrite this function to use it with specific substituent.")
 
-    def revert_to_original(self, c: Atom, sub: Atom) -> None:
+    def revert_to_original(self, c_id: int, sub_id: int) -> None:
         """
                 This method reverts to the original molecule.
                 Useful, will there be any need for iteration.
         """
-        hydrogen = Atom()
-        hydrogen.coord = sub.coord
-        hydrogen.symbol = "H"
-        hydrogen.atomic_num = 1
+        hydrogen = Atom(symbol=ATOMIC_SYMBOLS[1], atomic_number=1)
+        hydrogen.coord = self.get_atom(sub_id).coord
 
-        def remove(parent: Atom, substituent: Atom):
-            neigh = copy(self.neighbours[substituent.id])
+        def remove(parent_id: int, substituent_id: int):
+            neigh = copy(self.neighbours[substituent_id])
             for atom_id in neigh:
-                if atom_id != parent.id:
-                    remove(substituent, self.__atoms[atom_id])
+                if atom_id != parent_id:
+                    remove(substituent_id, atom_id)
 
-            if len(self.neighbours[substituent.id]) < 2:
-                self.del_atom(substituent.id)
+            if len(self.neighbours[substituent_id]) < 2:
+                self.del_atom(substituent_id)
 
-        remove(c, sub)
+        remove(c_id, sub_id)
 
         new_id = self.add_atom(hydrogen)
-        self.add_bond(c.id, new_id, BondType.SINGLE)
+        self.add_bond(c_id, new_id, BondType.SINGLE)
 
     def __eq__(self, other: 'Molecule'):
         return other.inchi_key == self.inchi_key
@@ -238,7 +236,6 @@ if __name__ == "__main__":
     mol = ob2dergen(a)
     mol.get_sites(CycleSelection.CYCLES)
     print(mol.sites)
-    print([mol.get_atom(key).])
 
     obm = dergen2ob(mol)
     conv.WriteFile(obm, os.path.join(ROOT_DIR, "original.svg"))
