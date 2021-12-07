@@ -5,7 +5,7 @@ from enum import Enum, auto
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 ATOMIC_SYMBOLS = dict()
-with open(os.path.join(ROOT_DIR, "AtomicSymbolDict.txt"), "r") as f:
+with open(os.path.join(ROOT_DIR, "../res/AtomicSymbolDict.txt"), "r") as f:
     for line in f.readlines():
         (k, v) = line.split('\t')
         ATOMIC_SYMBOLS[int(k)] = v[:-1]
