@@ -5,6 +5,7 @@ from Helper import Vector3
 from Definitions import SiteSelection, ATOMIC_SYMBOLS, BondType
 from Molecule import Molecule
 from typing import List, Dict
+from copy import deepcopy
 
 
 class TestMolecule(unittest.TestCase):
@@ -161,6 +162,51 @@ class TestMolecule(unittest.TestCase):
     def test_get_sites_CYCLES(self):
         self.mol.get_sites(SiteSelection.CYCLES)
         self.assertListEqual(sorted(self.mol.sites), [0, 1, 2])
+
+    def test_get_sites_NON_CYCLES(self):
+        self.mol.get_sites(SiteSelection.NON_CYCLES)
+        self.assertListEqual(sorted(self.mol.sites), [3, 4, 5, 6, 7])
+
+    def test_get_neighbours(self):
+        self.mol.get_sites(SiteSelection.CYCLES)
+        atoms_ids = self.mol.get_neighbours(0)
+        self.assertIs(atoms_ids, None)
+        c1_id, c2_id, h_id = self.mol.get_neighbours(2)
+
+        self.assertIn(c1_id, self.mol.atoms)
+        self.assertIn(c2_id, self.mol.atoms)
+        self.assertIn(h_id, self.mol.atoms)
+
+        self.assertIn(c1_id, self.mol.neighbours[c2_id])
+        self.assertIn(c1_id, self.mol.neighbours[h_id])
+        self.assertIn(c2_id, self.mol.neighbours[c1_id])
+        self.assertIn(h_id, self.mol.neighbours[c1_id])
+
+        self.assertIn(f"{h_id}_{c1_id}", self.mol.bonds)
+        self.assertIn(f"{c1_id}_{h_id}", self.mol.bonds)
+        self.assertIn(f"{c2_id}_{c1_id}", self.mol.bonds)
+        self.assertIn(f"{c1_id}_{c2_id}", self.mol.bonds)
+
+    def test_revert_to_original(self):
+        self.mol.get_sites(SiteSelection.CYCLES)
+        atom_ids = self.mol.get_neighbours(0)
+
+        original_mol = deepcopy(self.mol)
+
+        # A very large substituent with a lot of branches
+        new_ids = [self.mol.add_atom(Atom(coord=self.mol.get_atom(h_id).coord)) for _ in range(10)]
+        for i in range(1, 10):
+            self.mol.add_bond(new_ids[i-1], new_ids[i], BondType.SINGLE)
+            self.mol.add_bond(self.mol.add_atom(Atom()), new_ids[i-1], BondType.SINGLE)
+            self.mol.add_bond(self.mol.add_atom(Atom()), new_ids[i-1], BondType.SINGLE)
+
+        # New molecule
+        self.mol.del_atom(h_id)
+        self.mol.add_bond(c1_id, new_ids[0], BondType.SINGLE)
+
+        self.mol.revert_to_original(c1_id, new_ids[0])
+
+        self.assertEqual(original_mol, self.mol)
 
 
 if __name__ == '__main__':

@@ -49,5 +49,6 @@ class TestReduced(unittest.TestCase):
             self.assertTrue(red.atoms[key].coord == old_atoms[key].coord)
             self.assertEqual(red.atoms[key].symbol, old_atoms[key].symbol)
 
+
 if __name__ == "__main__":
     unittest.main()

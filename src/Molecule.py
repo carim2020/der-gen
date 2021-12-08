@@ -4,7 +4,7 @@
 from Atom import Atom
 from Helper import Vector3
 from Definitions import SiteSelection, BondType, ATOMIC_SYMBOLS
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 from copy import copy
 from openbabel import openbabel
 
@@ -60,7 +60,7 @@ class Molecule:
             raise KeyError("There is no atom with such id")
         return self.__atoms[index]
 
-    def find_atom(self, coordinates: Vector3) -> Atom:
+    def find_atom(self, coordinates: Vector3) -> int:
         for atom_id in self.__atoms:
             if self.__atoms[atom_id].coord == coordinates:
                 return atom_id
@@ -161,27 +161,30 @@ class Molecule:
         elif selection.value is SiteSelection.NON_CYCLES.value:
             cycle = self.__find_cycles()
             self.__sites = [k for k in self.__atoms
-                            if self.__atoms[k].symbol != "H" and self.__atoms[k] not in cycle]
+                            if self.__atoms[k].symbol != "H" and k not in cycle]
         elif selection.value is SiteSelection.ALL.value:
             self.__sites = [k for k in self.__atoms
                             if self.__atoms[k].symbol != "H"]
 
-    def get_neighbours(self, index: int) -> Tuple[int, int, int]:
-        if index >= len(self.__sites):
+    def get_neighbours(self, site_id: int) -> Union[None, Tuple[int, int, int]]:
+        if site_id >= len(self.__sites):
             raise KeyError("Index is out of the potential sites")
         # print("Get Neighbour")
         c2_id: int = -1
         h_id: int = -1
-        c1_id: int = self.__sites[index]
+        c1_id: int = self.__sites[site_id]
 
-        for atom_id in self.__neighbours[self.__sites[index]]:
+        for atom_id in self.__neighbours[self.__sites[site_id]]:
             if self.__atoms[atom_id].atomic_num != 1:
                 c2_id = atom_id
                 # print("Carbon")
             elif self.__atoms[atom_id].atomic_num == 1:
                 # print("Hydrogen")
                 h_id = atom_id
-        return c1_id, c2_id, h_id
+        if c1_id == -1 or c2_id == -1 or h_id == -1:
+            return None
+        else:
+            return c1_id, c2_id, h_id
 
     def generate_new_compound(self, c1_id: int, c2_id: int, h_id: int) -> int:
         """
