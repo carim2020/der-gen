@@ -23,7 +23,7 @@ class TestMolecule(unittest.TestCase):
                 self.atom_list.append(Atom(coord, atomic_num, symbol))
 
         if not self.atom_list:
-            raise FileNotFoundError("File 2-propylylcyclopentenone.xyz not found. Should be in the test/ directory.")
+            raise FileNotFoundError("File 2-propylylcyclopentenone.xyz not found. Should be in the res/ directory.")
 
         self.rekey: Dict[int, int] = dict()
         for ind, a in enumerate(self.atom_list):
@@ -45,9 +45,9 @@ class TestMolecule(unittest.TestCase):
                     self.bond_list["{}_{}".format(j, i)] = BondType.TRIPLE
                     self.mol.add_bond(i, j, BondType.TRIPLE)
                 elif self.atom_list[j].symbol == ATOMIC_SYMBOLS[1] and length < 1.5:
-                        self.bond_list["{}_{}".format(i, j)] = BondType.SINGLE
-                        self.bond_list["{}_{}".format(j, i)] = BondType.SINGLE
-                        self.mol.add_bond(i, j, BondType.SINGLE)
+                    self.bond_list["{}_{}".format(i, j)] = BondType.SINGLE
+                    self.bond_list["{}_{}".format(j, i)] = BondType.SINGLE
+                    self.mol.add_bond(i, j, BondType.SINGLE)
 
     def takeDown(self):
         atoms = self.mol.atoms

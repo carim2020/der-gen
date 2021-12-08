@@ -72,6 +72,7 @@ class Atom:
     #     self.__index = ind
 
     def __eq__(self, other: 'Atom'):
-        return self.__coord == other.coord and self.atomic_num == other.atomic_num and \
-               self.symbol == other.symbol and self.id == other.id
+        return self.__coord == other.coord and \
+               self.atomic_num == other.atomic_num and \
+               self.symbol == other.symbol
     

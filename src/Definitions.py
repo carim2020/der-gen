@@ -18,7 +18,7 @@ OUTPUT_FORMAT_SVG = "svg"
 INPUT_FORMAT = "xyz"
 
 
-class CycleSelection(Enum):
+class SiteSelection(Enum):
     CYCLES = auto()
     NON_CYCLES = auto()
     ALL = auto()

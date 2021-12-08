@@ -44,7 +44,7 @@ class TestTranslator(unittest.TestCase):
             ob_neighbours[beg].append(end)
             ob_neighbours[end].append(beg)
 
-        self.assertDictEqual({i: sorted([a.id for a in mol.neighbours[i]]) for i in mol.neighbours},
+        self.assertDictEqual({i: sorted([a for a in mol.neighbours[i]]) for i in mol.neighbours},
                              {i: sorted(ob_neighbours[i]) for i in ob_neighbours})
         self.assertDictEqual(ob_bonds, {key: mol.bonds[key].value for key in mol.bonds})
 

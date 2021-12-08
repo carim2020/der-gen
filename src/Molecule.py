@@ -3,7 +3,7 @@
 
 from Atom import Atom
 from Helper import Vector3
-from Definitions import CycleSelection, BondType, ATOMIC_SYMBOLS
+from Definitions import SiteSelection, BondType, ATOMIC_SYMBOLS
 from typing import Dict, List, Tuple
 from copy import copy
 from openbabel import openbabel
@@ -61,9 +61,9 @@ class Molecule:
         return self.__atoms[index]
 
     def find_atom(self, coordinates: Vector3) -> Atom:
-        for atom in self.__atoms:
-            if self.__atoms[atom].coord == coordinates:
-                return self.__atoms[atom]
+        for atom_id in self.__atoms:
+            if self.__atoms[atom_id].coord == coordinates:
+                return atom_id
 
     def add_bond(self, ind_a: int, ind_b: int, bond_type: BondType) -> None:
         self.__bonds["{}_{}".format(ind_a, ind_b)] = bond_type
@@ -120,18 +120,18 @@ class Molecule:
         if len(mark) == 0:
             raise RuntimeError("Molecule has no atoms")
         # Get the first atom
-        stack = [list(self.__atoms.values())[0]]
-        parent[stack[0].id] = stack[0].id
-        passed[stack[0].id] = 1
+        stack = [list(self.__atoms.keys())[0]]
+        parent[stack[0]] = stack[0]
+        passed[stack[0]] = 1
         while len(stack) != 0:  # while the stack is not empty
             # get the first element of the stack
-            cur = stack[-1]
+            cur_id = stack[-1]
             stack.pop()
-            for atom_id in self.__neighbours[cur.id]:
+            for atom_id in self.__neighbours[cur_id]:
                 # Cycle check
                 if passed[atom_id] == 1:
                     # print("Cycle found: {}".format(cur.id))
-                    temp = cur.id
+                    temp = cur_id
                     mark[atom_id] = True
                     mark[temp] = True
                     while temp != parent[atom_id]:
@@ -142,28 +142,28 @@ class Molecule:
 
                 # Add the neighbours that are not yet discovered
                 if passed[atom_id] == 0:
-                    parent[atom_id] = cur.id
+                    parent[atom_id] = cur_id
                     passed[atom_id] = 1
-                    stack.append(self.__atoms[atom_id])
+                    stack.append(atom_id)
 
-            passed[cur.id] = 2
+            passed[cur_id] = 2
 
         # Update the cycles list
-        cycles: List[int] = [ind for ind, m in enumerate(mark) if m]
+        cycles: List[int] = [_ for _ in mark if mark[_]]
         return copy(cycles)
 
-    def get_sites(self, selection: CycleSelection) -> None:
+    def get_sites(self, selection: SiteSelection) -> None:
         # Why it has to be with value but not without?
         # Potential BUG
-        if selection.value is CycleSelection.CYCLES.value:
+        if selection.value is SiteSelection.CYCLES.value:
             self.__sites = self.__find_cycles()
 
-        elif selection.value is CycleSelection.NON_CYCLES.value:
+        elif selection.value is SiteSelection.NON_CYCLES.value:
             cycle = self.__find_cycles()
-            self.__sites = [self.__atoms[k] for k in self.__atoms
+            self.__sites = [k for k in self.__atoms
                             if self.__atoms[k].symbol != "H" and self.__atoms[k] not in cycle]
-        elif selection.value is CycleSelection.ALL.value:
-            self.__sites = [self.__atoms[k] for k in self.__atoms
+        elif selection.value is SiteSelection.ALL.value:
+            self.__sites = [k for k in self.__atoms
                             if self.__atoms[k].symbol != "H"]
 
     def get_neighbours(self, index: int) -> Tuple[int, int, int]:
@@ -234,7 +234,7 @@ if __name__ == "__main__":
     builder.Build(a)
 
     mol = ob2dergen(a)
-    mol.get_sites(CycleSelection.CYCLES)
+    mol.get_sites(SiteSelection.CYCLES)
     print(mol.sites)
 
     obm = dergen2ob(mol)
