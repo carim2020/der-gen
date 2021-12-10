@@ -1,6 +1,6 @@
 import os
 
-__all__ = [_ for _ in os.listdir("src") if _.endswith(".py")]
+__all__ = [_ for _ in os.listdir("src")]
 
 from src import *
 

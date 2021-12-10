@@ -3,7 +3,7 @@ from Atom import Atom
 from Definitions import BondType, ATOMIC_SYMBOLS
 
 
-class NNOH(Reduced):
+class NNN(Reduced):
     def generate_new_compound(self, c1_id: int, c2_id: int, h_id: int) -> int:
         """
                 Extension of the Molecule class to create nitrile compounds
@@ -19,11 +19,8 @@ class NNOH(Reduced):
         newN2 = Atom(symbol=ATOMIC_SYMBOLS[7], atomic_number=7)
         newN2.coord = newN1.coord + unit_v * 1.25
 
-        newO = Atom(symbol=ATOMIC_SYMBOLS[8], atomic_number=8)
-        newO.coord = newN2.coord + unit_v * 1.35
-
-        newH = Atom(symbol=ATOMIC_SYMBOLS[1], atomic_number=1)
-        newH.coord = newO.coord + unit_v * 1.1
+        newN3 = Atom(symbol=ATOMIC_SYMBOLS[7], atomic_number=7)
+        newN3.coord = newN2.coord + unit_v * 1.25
 
         # First called BeginModify to stop reindexing at every step
         # self.start_modify()
@@ -31,13 +28,11 @@ class NNOH(Reduced):
         self.del_atom(h_id)
         newN1_id = self.add_atom(newN1)
         newN2_id = self.add_atom(newN2)
-        newO_id = self.add_atom(newO)
-        newH_id = self.add_atom(newH)
+        newO_id = self.add_atom(newN3)
 
         self.add_bond(c1_id, newN1_id, BondType.SINGLE)
         self.add_bond(newN1_id, newN2_id, BondType.DOUBLE)
-        self.add_bond(newN2_id, newO_id, BondType.SINGLE)
-        self.add_bond(newH_id, newO_id, BondType.SINGLE)
+        self.add_bond(newN2_id, newO_id, BondType.DOUBLE)
 
         # self.end_modify()
 

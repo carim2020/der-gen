@@ -12,12 +12,14 @@ with open(os.path.join(ROOT_DIR, "../res/AtomicSymbolDict.txt"), "r") as f:
         ATOMIC_SYMBOLS[int(k)] = v[:-1]
 
 OUT_FOLDER = os.path.join(ROOT_DIR, "../out")
-OUT_FOLDER_SVG = os.path.join(ROOT_DIR, "../out_svg")
+OUT_FOLDER_SVG = os.path.join(ROOT_DIR, "../svg")
+RED_OUT_FOLDER = os.path.join(ROOT_DIR, "../out_red")
+# RED_OUT_FOLDER_SVG = os.path.join(ROOT_DIR, "../svg_red")
 IN_FOLDER = os.path.join(ROOT_DIR, "../in")
 OUTPUT_FORMAT = "xyz"
 OUTPUT_FORMAT_SVG = "svg"
 INPUT_FORMAT = "xyz"
-
+ERROR_FOLDER = os.path.join(ROOT_DIR, "../error")
 
 class SiteSelection(Enum):
     CYCLES = auto()

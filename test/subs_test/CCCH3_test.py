@@ -2,9 +2,6 @@ import unittest
 
 from subs.CCCH3 import CCCH3
 from subs_test.subs_test_template import TestSubTemplate
-from Atom import Atom
-from Definitions import ATOMIC_SYMBOLS, BondType
-from Helper import Vector3
 
 
 class TestPropyl(TestSubTemplate):
