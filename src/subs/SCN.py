@@ -20,7 +20,7 @@ class SCN(Reduced):
         newC.coord = newS.coord + unit_v * 1.80
         
         newN = Atom(symbol=ATOMIC_SYMBOLS[7], atomic_number=7)
-        newN.coord = newC.coord + unit_v * 1.47
+        newN.coord = newC.coord + unit_v * 1.2
         
         # First called BeginModify to stop reindexing at every step
         # self.start_modify()

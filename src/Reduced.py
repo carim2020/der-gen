@@ -45,7 +45,7 @@ class Reduced(Molecule):
         return counter
 
     def oxidise(self, atomic_number: int = 3) -> None:
-        atoms = self.atoms
+        atoms = self.atoms.keys()
         for a in atoms:
             if self.get_atom(a).atomic_num == atomic_number:
                 self.del_atom(a)

@@ -52,6 +52,7 @@ class Molecule:
         for ind in set(n_ind):
             self.__neighbours[ind].remove(index)
         self.__atoms.pop(index)
+        self.__neighbours.pop(index)
 
     # Returns reference to the atom!
     def get_atom(self, index: int) -> Atom:
