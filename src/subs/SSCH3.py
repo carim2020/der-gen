@@ -28,7 +28,6 @@ class SSCH3(Reduced):
 
         newC3 = Atom(atomic_number=6, symbol=ATOMIC_SYMBOLS[6])
         newC3.coord = newS2.coord + bond_vector * 1.8  # sp-sp3 bond bond
-        new_c3_id = self.num_atoms + 2
 
         new_H_vec = bond_vector * math.cos(math.radians(70)) + norm_vector * math.sin(math.radians(70))
 
@@ -48,6 +47,6 @@ class SSCH3(Reduced):
         self.add_bond(newS1_id, newS2_id, BondType.SINGLE)
         self.add_bond(newS2_id, newC3_id, BondType.SINGLE)
         for ind in new_H_id:
-            self.add_bond(new_c3_id, ind, BondType.SINGLE)
+            self.add_bond(newC3_id, ind, BondType.SINGLE)
 
         return newS1_id

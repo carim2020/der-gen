@@ -75,9 +75,9 @@ if __name__ == "__main__":
             unique_files[mol[1].inchi_key] = mol
 
     for mol in unique_files:
-        obm = dergen2ob(reduced_files[mol][1])
-        conv.WriteFile(obm, os.path.join(RED_OUT_FOLDER, "{}.{}".format(reduced_files[mol][0], OUTPUT_FORMAT)))
-        conv.WriteFile(obm, os.path.join(RED_OUT_FOLDER_SVG, "{}.{}".format(reduced_files[mol][0], OUTPUT_FORMAT_SVG)))
+        obm = dergen2ob(unique_files[mol][1])
+        conv.WriteFile(obm, os.path.join(RED_OUT_FOLDER, "{}.{}".format(unique_files[mol][0], OUTPUT_FORMAT)))
+        # conv.WriteFile(obm, os.path.join(RED_OUT_FOLDER_SVG, "{}.{}".format(unique_files[mol][0], OUTPUT_FORMAT_SVG)))
 
     for mol in errors:
         obm = dergen2ob(mol[1])
