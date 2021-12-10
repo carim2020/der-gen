@@ -6,7 +6,7 @@ from Definitions import BondType, ATOMIC_SYMBOLS
 
 
 class Reduced(Molecule):
-    def __init__(self, molecule: Molecule = Molecule()):
+    def __init__(self, molecule: Molecule):
         super().__init__()
         for a_i in molecule.atoms:
             self.add_atom(molecule.atoms[a_i])

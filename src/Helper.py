@@ -106,6 +106,10 @@ class Vector3:
                       [(t * axis_norm.x * axis_norm.z - S * axis_norm.y), (t * axis_norm.y * axis_norm.z + S * axis_norm.x), (t * axis_norm.z**2 + C)]])
         return Vector3.from_numpy(np.transpose(R @ np.transpose(self.to_numpy())))
 
+    def unit(self) -> 'Vector3':
+        length = self.length()
+        return Vector3(self.x/length, self.y/length, self.z/length)
+
 
 def cross_product(lhs: Vector3, rhs: Vector3) -> Vector3:
     return Vector3.from_numpy(np.cross(lhs.to_numpy(), rhs.to_numpy()))

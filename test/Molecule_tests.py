@@ -206,15 +206,15 @@ class TestMolecule(unittest.TestCase):
         self.mol.add_bond(c1_id, new_ids[0], BondType.SINGLE)
 
         self.mol.revert_to_original(c1_id, new_ids[0])
-        from Translator import dergen2ob
-        from openbabel import openbabel as ob
-        ob_original = dergen2ob(original_mol)
-        ob_mol = dergen2ob(self.mol)
-
-        conv = ob.OBConversion()
-        conv.SetOutFormat("svg")
-        conv.WriteFile(ob_original, "original_mol.svg")
-        conv.WriteFile(ob_mol, "mol.svg")
+        # from Translator import dergen2ob
+        # from openbabel import openbabel as ob
+        # ob_original = dergen2ob(original_mol)
+        # ob_mol = dergen2ob(self.mol)
+        #
+        # conv = ob.OBConversion()
+        # conv.SetOutFormat("svg")
+        # conv.WriteFile(ob_original, "original_mol.svg")
+        # conv.WriteFile(ob_mol, "mol.svg")
         self.assertEqual(original_mol, self.mol)
 
 

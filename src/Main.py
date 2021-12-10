@@ -2,11 +2,13 @@ import os
 import copy
 # import time
 
-from Propylyl import Propylyl
+from Definitions import OUT_FOLDER, IN_FOLDER, OUT_FOLDER_SVG, \
+                        INPUT_FORMAT, OUTPUT_FORMAT, OUTPUT_FORMAT_SVG, SiteSelection
 from Molecule import Molecule
 from Translator import ob2dergen, dergen2ob
 from openbabel import openbabel as ob
-from Definitions import OUT_FOLDER, IN_FOLDER, OUT_FOLDER_SVG, INPUT_FORMAT, OUTPUT_FORMAT, OUTPUT_FORMAT_SVG
+from typing import List
+from subs
 
 
 __author__ = "Ilia Kichev"
@@ -38,15 +40,15 @@ if __name__ == "__main__":
             ob_mol = ob.OBMol()
             conv.ReadFile(ob_mol, os.path.join(IN_FOLDER, filename))
 
-            nit = Propylyl(ob2dergen(ob_mol))
+            nit = CCCH3(ob2dergen(ob_mol))
             # print([(a, nit.atoms[a].symbol) for a database nit.atoms])
             # print(nit.bonds)
-            nit.get_sites()
+            nit.get_sites(SiteSelection.CYCLES)
             # print([a.id for a database nit.cycles])
             index = 0
             for ind, m in enumerate(nit.sites):
                 # Only add substituent on carbon atoms
-                if m.atomic_num == 6:
+                if nit.get_atom(m).atomic_num == 6:
                     c, other, hydrogen = nit.get_neighbours(ind)
                     if c is not None and other is not None and hydrogen is not None:
                         sub_atom = nit.generate_new_compound(c, other, hydrogen)
@@ -63,9 +65,9 @@ if __name__ == "__main__":
     unique_files = dict()
     for mol in output_files:
         print(mol[0])
-        inchi = get_inchi_key(mol[1])
-        if inchi not in unique_files:
-            unique_files[inchi] = mol
+        mol[1].inchi = ""
+        if mol[1].inchi not in unique_files:
+            unique_files[mol[1].inchi] = mol
 
     # timing.append(time.monotonic() - beginning)
     # print("Sorting: {}".format(time.monotonic() - beggining))

@@ -7,7 +7,6 @@ from Definitions import SiteSelection, BondType, ATOMIC_SYMBOLS
 from typing import Dict, List, Tuple, Union
 from copy import copy
 
-
 __author__ = "Ilia Kichev"
 __credits__ = ["Ilia Kichev", "Lyuben Borislavov", "Alia Tadjer"]
 __version__ = "1.1.0"
@@ -196,7 +195,7 @@ class Molecule:
                 Useful, will there be any need for iteration.
         """
         hydrogen = Atom(symbol=ATOMIC_SYMBOLS[1], atomic_number=1)
-        hydrogen.coord = self.get_atom(sub_id).coord
+        hydrogen.coord = self.get_atom(c_id).coord + (self.get_atom(sub_id).coord - self.get_atom(c_id).coord).unit() * 1.06
 
         def remove(parent_id: int, substituent_id: int):
             neigh = copy(self.neighbours[substituent_id])

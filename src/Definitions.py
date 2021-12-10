@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 
 from enum import Enum, auto
@@ -10,9 +11,9 @@ with open(os.path.join(ROOT_DIR, "../res/AtomicSymbolDict.txt"), "r") as f:
         (k, v) = line.split('\t')
         ATOMIC_SYMBOLS[int(k)] = v[:-1]
 
-OUT_FOLDER = os.path.join(ROOT_DIR, "out")
-OUT_FOLDER_SVG = os.path.join(ROOT_DIR, "out_svg")
-IN_FOLDER = os.path.join(ROOT_DIR, "in")
+OUT_FOLDER = os.path.join(ROOT_DIR, "../out")
+OUT_FOLDER_SVG = os.path.join(ROOT_DIR, "../out_svg")
+IN_FOLDER = os.path.join(ROOT_DIR, "../in")
 OUTPUT_FORMAT = "xyz"
 OUTPUT_FORMAT_SVG = "svg"
 INPUT_FORMAT = "xyz"

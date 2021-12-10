@@ -126,6 +126,17 @@ class TestVector3(unittest.TestCase):
         v = v.rotate_around_axis(u, -math.pi/4)
         self.assertTrue(v == Vector3(-1.3902062920441292, -1.9027983900178758, 3.940619843692905))
 
+    def test_unit(self):
+        self.assertEqual(Vector3(10, 0, 0).unit(), Vector3(1, 0, 0))
+        self.assertEqual(Vector3(0, 10, 0).unit(), Vector3(0, 1, 0))
+        self.assertEqual(Vector3(0, 0, 10).unit(), Vector3(0, 0, 1))
+        l = 3 * math.sqrt(3)
+        x = 1 / l
+        y = 5 / l
+        z = -1 / l
+        self.assertEqual(Vector3(x, y, z), Vector3(1, 5, -1).unit())
+
+
 
 class TestCrossAndDotProduct(unittest.TestCase):
     def setUp(self):
