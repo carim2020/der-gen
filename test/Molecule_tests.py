@@ -165,13 +165,13 @@ class TestMolecule(unittest.TestCase):
 
     def test_get_sites_NON_CYCLES(self):
         self.mol.get_sites(SiteSelection.NON_CYCLES)
-        self.assertListEqual(sorted(self.mol.sites), [3, 4, 5, 6, 7])
+        self.assertListEqual(sorted(self.mol.sites), [3, 4, 5])
 
     def test_get_neighbours(self):
         self.mol.get_sites(SiteSelection.CYCLES)
         atoms_ids = self.mol.get_neighbours(0)
         self.assertIs(atoms_ids, None)
-        c1_id, c2_id, h_id = self.mol.get_neighbours(2)
+        c1_id, c2_id, h_id = self.mol.get_neighbours(1)
 
         self.assertIn(c1_id, self.mol.atoms)
         self.assertIn(c2_id, self.mol.atoms)
