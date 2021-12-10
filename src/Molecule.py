@@ -1,12 +1,12 @@
 # TODO: Some refactoring is needed. The Molecule class has too many responsibilities.
 # TODO: Make some kind of memory and speed benchmark for a substantial load (Not 3 molecules but 300)
-
+from __future__ import annotations
 from Atom import Atom
 from Helper import Vector3
 from Definitions import SiteSelection, BondType, ATOMIC_SYMBOLS
 from typing import Dict, List, Tuple, Union
 from copy import copy
-from openbabel import openbabel
+
 
 __author__ = "Ilia Kichev"
 __credits__ = ["Ilia Kichev", "Lyuben Borislavov", "Alia Tadjer"]
@@ -99,13 +99,9 @@ class Molecule:
 
     @property
     def inchi_key(self) -> str:
+        from Translator import get_inchi_key
         if self.__inchi_key == "":
-            ob_mol = dergen2ob(self)
-            conv = openbabel.OBConversion()
-            conv.SetInAndOutFormats("mol", "inchikey")
-
-            self.__inchi_key = conv.WriteString(ob_mol)
-
+            self.__inchi_key = get_inchi_key(self)
         return self.__inchi_key
 
     @inchi_key.setter

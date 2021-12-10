@@ -1,3 +1,4 @@
+
 import unittest
 
 from Atom import Atom
@@ -20,7 +21,7 @@ class TestMolecule(unittest.TestCase):
             for line in content[2:]:
                 symbol = line.split()[0]
                 coord = Vector3(float(line.split()[1]), float(line.split()[2]), float(line.split()[3]))
-                atomic_num = list(ATOMIC_SYMBOLS.values()).index(symbol)
+                atomic_num = list(ATOMIC_SYMBOLS.values()).index(symbol)+1
                 self.atom_list.append(Atom(coord, atomic_num, symbol))
 
         if not self.atom_list:
@@ -189,7 +190,7 @@ class TestMolecule(unittest.TestCase):
 
     def test_revert_to_original(self):
         self.mol.get_sites(SiteSelection.CYCLES)
-        atom_ids = self.mol.get_neighbours(0)
+        c1_id, c2_id, h_id = self.mol.get_neighbours(1)
 
         original_mol = deepcopy(self.mol)
 
@@ -205,7 +206,15 @@ class TestMolecule(unittest.TestCase):
         self.mol.add_bond(c1_id, new_ids[0], BondType.SINGLE)
 
         self.mol.revert_to_original(c1_id, new_ids[0])
+        from Translator import dergen2ob
+        from openbabel import openbabel as ob
+        ob_original = dergen2ob(original_mol)
+        ob_mol = dergen2ob(self.mol)
 
+        conv = ob.OBConversion()
+        conv.SetOutFormat("svg")
+        conv.WriteFile(ob_original, "original_mol.svg")
+        conv.WriteFile(ob_mol, "mol.svg")
         self.assertEqual(original_mol, self.mol)
 
 

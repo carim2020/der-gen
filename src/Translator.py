@@ -1,4 +1,5 @@
-﻿from openbabel import openbabel as ob
+﻿from __future__ import annotations
+from openbabel import openbabel as ob
 from Molecule import Molecule
 from Helper import Vector3
 from Atom import Atom
@@ -63,3 +64,10 @@ def ob2dergen(obm: ob.OBMol) -> Molecule:
         out_mol.add_bond(bond[0], bond[1], BondType.from_ob_bond_bype(bond[2]))
 
     return copy(out_mol)
+
+
+def get_inchi_key(mol: 'Molecule'):
+    ob_mol = dergen2ob(mol)
+    conv = ob.OBConversion()
+    conv.SetInAndOutFormats("mol", "inchikey")
+    return conv.WriteString(ob_mol)

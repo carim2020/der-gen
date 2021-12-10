@@ -113,3 +113,5 @@ def cross_product(lhs: Vector3, rhs: Vector3) -> Vector3:
 
 def dot_product(lhs: Vector3, rhs: Vector3) -> float:
     return float(np.dot(lhs.to_numpy(), rhs.to_numpy()))
+
+
