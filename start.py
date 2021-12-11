@@ -25,7 +25,7 @@ if __name__ == "__main__":
     conv = ob.OBConversion()
     conv.SetInFormat(INPUT_FORMAT)
 
-    # These lines load all the modules from the subs directory dynamically
+    # These lines load all the modules from the subs start.pydirectory dynamically
     import subs
     from subs import *
     for name in subs.__all__:
