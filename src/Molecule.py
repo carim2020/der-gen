@@ -167,7 +167,7 @@ class Molecule:
             raise KeyError("Index is out of the potential sites")
         # print("Get Neighbour")
         c2_id: int = -1
-        h_id: int = -1
+        h_id: List[int] = list()
         c1_id: int = self.__sites[site_id]
 
         for atom_id in self.__neighbours[self.__sites[site_id]]:
@@ -176,11 +176,20 @@ class Molecule:
                 # print("Carbon")
             elif self.__atoms[atom_id].atomic_num == 1:
                 # print("Hydrogen")
-                h_id = atom_id
-        if c1_id == -1 or c2_id == -1 or h_id == -1:
-            return None
+                h_id.append(atom_id)
+
+        if len(h_id) == 4:
+            for i in range(4):
+                if i != 3:
+                    yield c1_id, h_id[3], h_id[i]
+                else:
+                    yield c1_id, h_id[1], h_id[3]
+
+        elif c1_id == -1 or c2_id == -1 or h_id is None:
+            yield -1, -1, -1
         else:
-            return c1_id, c2_id, h_id
+            for h in h_id:
+                yield c1_id, c2_id, h
 
     def generate_new_compound(self, c1_id: int, c2_id: int, h_id: int) -> int:
         """

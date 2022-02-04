@@ -38,24 +38,23 @@ if __name__ == "__main__":
                 mol = locals()[name](ob2dergen(ob_mol))
 
                 index = 0
-                mol.get_sites(SiteSelection.CYCLES)
+                mol.get_sites(SiteSelection.ALL)
                 for ind, m in enumerate(mol.sites):
                     # Only add substituent on carbon atoms
                     if mol.get_atom(m).atomic_num == 6:
+                        for possible_site in mol.get_neighbours(ind):
+                            if not any(_ == -1 for _ in possible_site):
+                                sub_atom = mol.generate_new_compound(possible_site[0], possible_site[1], possible_site[2])
+                                new_name = "{}_{}_{}".format(filename.split(".")[0], name.split(".")[-1], index)
 
-                        possible_site = mol.get_neighbours(ind)
-                        if possible_site:
-                            sub_atom = mol.generate_new_compound(possible_site[0], possible_site[1], possible_site[2])
-                            new_name = "{}_{}_{}".format(filename.split(".")[0], name.split(".")[-1], index)
-
-                            output_files.append((new_name, copy.deepcopy(mol)))
-                            if mol.reduce() == 2:
-                                reduced_files.append((f"Li_{new_name}", copy.deepcopy(mol)))
-                            else:
-                                errors.append((f"Li_{new_name}", copy.deepcopy(mol)))
-                            mol.oxidise()
-                            mol.revert_to_original(possible_site[0], sub_atom)
-                            index = index + 1
+                                output_files.append((new_name, copy.deepcopy(mol)))
+                                if mol.reduce() == 2:
+                                    reduced_files.append((f"Li_{new_name}", copy.deepcopy(mol)))
+                                else:
+                                    errors.append((f"Li_{new_name}", copy.deepcopy(mol)))
+                                mol.oxidise()
+                                mol.revert_to_original(possible_site[0], sub_atom)
+                                index = index + 1
 
     unique_files = dict()
     for mol in output_files:
